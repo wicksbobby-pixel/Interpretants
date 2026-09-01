@@ -27,7 +27,9 @@ function renderCaseTable(title: string, table: Record<string, FormCell>): string
       const abbrev = CASE_ABBREV[caseName as keyof typeof CASE_ABBREV] ?? caseName.slice(0, 3).toUpperCase();
       const flags = [
         c.uncertain ? '<span class="flag uncertain">unconfirmed</span>' : '',
-        c.stemAlternation ? `<span class="flag alt">${c.stemAlternation.from}→${c.stemAlternation.to}</span>` : '',
+        c.stemAlternation
+          ? `<span class="flag alt">${c.stemAlternation.from}→${c.stemAlternation.to} (${c.stemAlternation.mechanism})</span>`
+          : '',
       ].join(' ');
       return `<tr><td class="case">${abbrev}</td><td class="form">${c.form}</td><td class="flags">${flags}</td></tr>`;
     })
@@ -115,7 +117,7 @@ function renderApp() {
           (n) => `
           <div class="entry">
             <div class="entry-head"><span class="lemma">${n.lemma}</span><span class="pos">${n.partOfSpeech}</span></div>
-            <div class="entry-meta">${n.gender}${n.animacy ? ` · ${n.animacy}` : ''} · ${n.declensionClass} · "${n.translation}"${n.irregular ? ' · IRREGULAR' : ''}</div>
+            <div class="entry-meta">${n.gender}${n.animacy ? ` · ${n.animacy}` : ''} · plural agreement: ${n.pluralAgreementClass} · ${n.declensionClass} · "${n.translation}"${n.irregular ? ' · IRREGULAR' : ''}</div>
             ${n.irregularNote ? `<div class="entry-notes">⚑ ${n.irregularNote}</div>` : ''}
             ${n.notes ? `<div class="entry-notes">${n.notes}</div>` : ''}
             <div class="tables">

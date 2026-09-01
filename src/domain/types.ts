@@ -67,7 +67,26 @@ export type ConjugationPattern =
 export type StemHardness = 'hard' | 'soft' | 'mixed';
 
 /**
- * A stem consonant alternation attested in a specific paradigm cell, e.g.
+ * The phonological process behind a stem alternation. Kept distinct because
+ * the seed data already needs three different ones and they're not
+ * interchangeable for feedback purposes:
+ *  - 'palatalization': a stem consonant softens before a front vowel/glide
+ *    ending (t→ć, s→ś, n→ń, k→c, g→dz, r→rz — this bucket follows the
+ *    pedagogical convention of grouping all of these together, though
+ *    historically r→rz reflects a distinct Slavic sound change (iotation)
+ *    from the t→ć/k→c type (first/second palatalization reflexes)).
+ *  - 'l-hardening': historical ł→l before a following front vowel (stół →
+ *    stole). Not consonant softening — if anything the opposite lineage —
+ *    so lumping it in with palatalization would misname the mechanism in
+ *    feedback text.
+ *  - 'vowel-epenthesis': a vowel is inserted (not a consonant changed) to
+ *    break up an otherwise-illegal cluster in a zero-ending cell, e.g.
+ *    okno → okien (genitive plural) inserting -e- into okn-.
+ */
+export type StemAlternationMechanism = 'palatalization' | 'l-hardening' | 'vowel-epenthesis';
+
+/**
+ * A stem alternation attested in a specific paradigm cell, e.g.
  * kot → kocie (t → ć, spelled "ci") in the locative singular. `description`
  * is the human-readable annotation shown in post-answer feedback, per the
  * app's requirement to name the alternation, not just the case.
@@ -75,6 +94,7 @@ export type StemHardness = 'hard' | 'soft' | 'mixed';
 export interface StemAlternation {
   from: string;
   to: string;
+  mechanism: StemAlternationMechanism;
   description: string;
 }
 
@@ -102,6 +122,23 @@ export interface NounEntry {
   gender: Gender;
   /** Required in practice for masculine; not meaningful for fem/neut gender agreement, but still drives virile/non-virile plural when the noun is personal. */
   animacy?: Animacy;
+  /**
+   * Which plural agreement pattern predicates/adjectives modifying this
+   * noun in the plural must use — 'virile' (e.g. past-tense -li, byli;
+   * nominative-plural adjective -y/-i with the k→c/r→rz etc. alternations)
+   * vs. 'nonvirile' (past-tense -ły, były; adjective -e, no alternation).
+   *
+   * Stored explicitly rather than derived from gender+animacy because it is
+   * NOT a reliable function of those alone: dziecko ("child") denotes a
+   * human referent but its plural (dzieci) is a lexically fixed exception
+   * that takes non-virile agreement — "dzieci były grzeczne", not
+   * "*dzieci byli grzeczni". A derive-from-animacy rule would get this
+   * word wrong with full confidence, which is exactly the failure mode
+   * this field exists to prevent. As a rule of thumb when adding new
+   * nouns: personal animacy → virile, everything else → nonvirile, UNLESS
+   * you know of a lexical exception like this one.
+   */
+  pluralAgreementClass: 'virile' | 'nonvirile';
   /** Free-text descriptive label, e.g. "masculine personal, hard stem". Not an enum — declension class taxonomies vary by source and I'd rather describe than misclassify. */
   declensionClass: string;
   stemHardness: StemHardness;

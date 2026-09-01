@@ -48,7 +48,7 @@ export const ADJECTIVES: AdjectiveEntry[] = [
       plural: {
         virile: {
           nominative: cell('dobrzy', {
-            stemAlternation: { from: 'r', to: 'rz', description: 'r → rz in the virile nominative/vocative plural' },
+            stemAlternation: { from: 'r', to: 'rz', mechanism: 'palatalization', description: 'r → rz in the virile nominative/vocative plural' },
           }),
           genitive: cell('dobrych'),
           dative: cell('dobrym'),
@@ -57,7 +57,7 @@ export const ADJECTIVES: AdjectiveEntry[] = [
           locative: cell('dobrych', { syncreticWith: ['genitive', 'accusative'] }),
           vocative: cell('dobrzy', {
             syncreticWith: ['nominative'],
-            stemAlternation: { from: 'r', to: 'rz', description: 'r → rz in the virile nominative/vocative plural' },
+            stemAlternation: { from: 'r', to: 'rz', mechanism: 'palatalization', description: 'r → rz in the virile nominative/vocative plural' },
           }),
         },
         nonvirile: {
@@ -112,7 +112,7 @@ export const ADJECTIVES: AdjectiveEntry[] = [
       plural: {
         virile: {
           nominative: cell('wysocy', {
-            stemAlternation: { from: 'k', to: 'c', description: 'k → c in the virile nominative/vocative plural (parallel to Polak → Polacy)' },
+            stemAlternation: { from: 'k', to: 'c', mechanism: 'palatalization', description: 'k → c in the virile nominative/vocative plural (parallel to Polak → Polacy)' },
           }),
           genitive: cell('wysokich'),
           dative: cell('wysokim'),
@@ -121,7 +121,7 @@ export const ADJECTIVES: AdjectiveEntry[] = [
           locative: cell('wysokich', { syncreticWith: ['genitive', 'accusative'] }),
           vocative: cell('wysocy', {
             syncreticWith: ['nominative'],
-            stemAlternation: { from: 'k', to: 'c', description: 'k → c in the virile nominative/vocative plural' },
+            stemAlternation: { from: 'k', to: 'c', mechanism: 'palatalization', description: 'k → c in the virile nominative/vocative plural' },
           }),
         },
         nonvirile: {

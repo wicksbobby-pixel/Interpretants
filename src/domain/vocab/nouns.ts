@@ -22,6 +22,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'animate',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine animate, hard stem',
     stemHardness: 'hard',
     paradigm: {
@@ -32,11 +33,11 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('kota', { syncreticWith: ['genitive'] }),
         instrumental: cell('kotem'),
         locative: cell('kocie', {
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before locative/vocative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before locative/vocative -e' },
         }),
         vocative: cell('kocie', {
           syncreticWith: ['locative'],
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before locative/vocative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before locative/vocative -e' },
         }),
       },
       plural: {
@@ -58,6 +59,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'inanimate',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
     paradigm: {
@@ -68,7 +70,7 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('stół', { syncreticWith: ['nominative'] }),
         instrumental: cell('stołem'),
         locative: cell('stole', {
-          stemAlternation: { from: 'ł', to: 'l', description: 'ł → l before locative/vocative -e (historical hardening, not palatalization proper)' },
+          stemAlternation: { from: 'ł', to: 'l', mechanism: 'l-hardening', description: 'ł → l before locative/vocative -e (historical hardening, not palatalization proper)' },
         }),
         vocative: cell('stole', { syncreticWith: ['locative'] }),
       },
@@ -91,6 +93,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'personal',
+    pluralAgreementClass: 'virile',
     declensionClass: 'masculine personal, hard stem',
     stemHardness: 'hard',
     paradigm: {
@@ -101,13 +104,13 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('studenta', { syncreticWith: ['genitive'] }),
         instrumental: cell('studentem'),
         locative: cell('studencie', {
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before locative/vocative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before locative/vocative -e' },
         }),
         vocative: cell('studencie', { syncreticWith: ['locative'] }),
       },
       plural: {
         nominative: cell('studenci', {
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") in the virile nominative plural' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") in the virile nominative plural' },
         }),
         genitive: cell('studentów'),
         dative: cell('studentom'),
@@ -126,6 +129,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'personal',
+    pluralAgreementClass: 'virile',
     declensionClass: 'masculine personal, soft stem',
     stemHardness: 'soft',
     paradigm: {
@@ -156,6 +160,7 @@ export const NOUNS: NounEntry[] = [
     translation: 'woman',
     partOfSpeech: 'noun',
     gender: 'feminine',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, hard stem, -a',
     stemHardness: 'hard',
     paradigm: {
@@ -164,13 +169,13 @@ export const NOUNS: NounEntry[] = [
         genitive: cell('kobiety'),
         dative: cell('kobiecie', {
           syncreticWith: ['locative'],
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before dative/locative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before dative/locative -e' },
         }),
         accusative: cell('kobietę'),
         instrumental: cell('kobietą'),
         locative: cell('kobiecie', {
           syncreticWith: ['dative'],
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before dative/locative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before dative/locative -e' },
         }),
         vocative: cell('kobieto'),
       },
@@ -191,6 +196,7 @@ export const NOUNS: NounEntry[] = [
     translation: 'earth / land',
     partOfSpeech: 'noun',
     gender: 'feminine',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, soft stem, -a',
     stemHardness: 'soft',
     paradigm: {
@@ -224,6 +230,7 @@ export const NOUNS: NounEntry[] = [
     translation: 'night',
     partOfSpeech: 'noun',
     gender: 'feminine',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, consonant-stem (i-declension), soft/functionally-soft',
     stemHardness: 'soft',
     paradigm: {
@@ -254,6 +261,7 @@ export const NOUNS: NounEntry[] = [
     translation: 'window',
     partOfSpeech: 'noun',
     gender: 'neuter',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, hard stem, -o',
     stemHardness: 'hard',
     paradigm: {
@@ -264,14 +272,19 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('okno', { syncreticWith: ['nominative'] }),
         instrumental: cell('oknem'),
         locative: cell('oknie', {
-          stemAlternation: { from: 'n', to: 'ń', description: 'n → ń (spelled "ni") before locative -e' },
+          stemAlternation: { from: 'n', to: 'ń', mechanism: 'palatalization', description: 'n → ń (spelled "ni") before locative -e' },
         }),
         vocative: cell('okno', { syncreticWith: ['nominative'] }),
       },
       plural: {
         nominative: cell('okna'),
         genitive: cell('okien', {
-          uncertainNote: 'Fleeting/epenthetic -e- inserted to break up the kn cluster in the zero-ending genitive plural (okno → okien, not *okn). This is vowel epenthesis, not consonant alternation — flagged as a note rather than a stemAlternation for that reason.',
+          stemAlternation: {
+            from: '∅',
+            to: 'e',
+            mechanism: 'vowel-epenthesis',
+            description: 'fleeting -e- inserted to break up the kn cluster in the zero-ending genitive plural (okno → okien, not *okn)',
+          },
         }),
         dative: cell('oknom'),
         accusative: cell('okna', { syncreticWith: ['nominative'] }),
@@ -287,6 +300,7 @@ export const NOUNS: NounEntry[] = [
     translation: 'apartment',
     partOfSpeech: 'noun',
     gender: 'neuter',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, soft stem, -e (deverbal -anie type)',
     stemHardness: 'soft',
     paradigm: {
@@ -318,6 +332,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'inanimate',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
     paradigm: {
@@ -328,7 +343,7 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('długopis', { syncreticWith: ['nominative'] }),
         instrumental: cell('długopisem'),
         locative: cell('długopisie', {
-          stemAlternation: { from: 's', to: 'ś', description: 's → ś (spelled "si") before locative/vocative -e' },
+          stemAlternation: { from: 's', to: 'ś', mechanism: 'palatalization', description: 's → ś (spelled "si") before locative/vocative -e' },
         }),
         vocative: cell('długopisie', { syncreticWith: ['locative'] }),
       },
@@ -350,6 +365,7 @@ export const NOUNS: NounEntry[] = [
     partOfSpeech: 'noun',
     gender: 'masculine',
     animacy: 'inanimate',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
     paradigm: {
@@ -360,7 +376,7 @@ export const NOUNS: NounEntry[] = [
         accusative: cell('uniwersytet', { syncreticWith: ['nominative'] }),
         instrumental: cell('uniwersytetem'),
         locative: cell('uniwersytecie', {
-          stemAlternation: { from: 't', to: 'ć', description: 't → ć (spelled "ci") before locative/vocative -e' },
+          stemAlternation: { from: 't', to: 'ć', mechanism: 'palatalization', description: 't → ć (spelled "ci") before locative/vocative -e' },
         }),
         vocative: cell('uniwersytecie', { syncreticWith: ['locative'] }),
       },
@@ -382,11 +398,12 @@ export const NOUNS: NounEntry[] = [
     translation: 'child',
     partOfSpeech: 'noun',
     gender: 'neuter',
+    pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, velar stem, -o (irregular/suppletive plural)',
     stemHardness: 'hard',
     irregular: true,
     irregularNote:
-      'Plural is suppletive ("dzieci", not a regular reflex of the singular stem) and, semantically, behaves like a personal plural for agreement purposes even though it is grammatically neuter and its plural forms pattern with non-virile morphology. Treat as memorize-directly rather than pattern-generalizable.',
+      'Plural is suppletive ("dzieci", not a regular reflex of the singular stem). Declension aside, dzieci is also a genuine, lexically fixed exception to the general "human referent → virile agreement" rule: despite denoting people, it takes NON-virile agreement throughout — "Dzieci były grzeczne" (były, not byli), "grzeczne dzieci" (grzeczne, not grzeczni). A clause generator that infers agreement class from animacy/personhood alone will get this word wrong with full confidence; pluralAgreementClass is set explicitly below for exactly that reason. Treat the whole entry as memorize-directly rather than pattern-generalizable.',
     paradigm: {
       singular: {
         nominative: cell('dziecko'),
@@ -400,18 +417,13 @@ export const NOUNS: NounEntry[] = [
         vocative: cell('dziecko', { syncreticWith: ['nominative'] }),
       },
       plural: {
-        nominative: cell('dzieci', { uncertain: false }),
+        nominative: cell('dzieci'),
         genitive: cell('dzieci', {
           syncreticWith: ['nominative', 'accusative', 'vocative'],
-          uncertain: true,
-          uncertainNote: 'Zero-ending genitive plural, surface-identical to nominative plural — please confirm, this is the cell I trust least in this entry.',
         }),
         dative: cell('dzieciom'),
         accusative: cell('dzieci', { syncreticWith: ['nominative', 'genitive', 'vocative'] }),
-        instrumental: cell('dziećmi', {
-          uncertain: true,
-          uncertainNote: 'Irregular instrumental plural (ć, not the expected -ciami/-kami shape) — please confirm.',
-        }),
+        instrumental: cell('dziećmi'),
         locative: cell('dzieciach'),
         vocative: cell('dzieci', { syncreticWith: ['nominative', 'genitive', 'accusative'] }),
       },
