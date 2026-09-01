@@ -62,6 +62,12 @@ export const VERBS: VerbEntry[] = [
     principalParts: { infinitive: 'być', firstSingular: 'jestem', thirdSingular: 'jest' },
     governance: [
       { complement: 'predicate', case: 'instrumental', note: 'predicate nominal after być takes instrumental, e.g. "Jestem nauczycielem"' },
+      {
+        complement: 'oblique',
+        case: 'locative',
+        preposition: 'na',
+        note: 'static location, "to be at/on" — pairs with iść\'s "na" + accusative (motion) as a minimal pair for the same preposition switching case by motion vs. location',
+      },
     ],
     irregular: true,
     irregularNote: 'Suppletive: jestem/jest bear no transparent phonological relation to the infinitive być (distinct historical roots). Memorize directly.',
@@ -139,6 +145,24 @@ export const VERBS: VerbEntry[] = [
       },
     ],
     notes: 'Stem consonant alternation is in the CONJUGATION here, not the declension: s → sz throughout the present tense (piszę, piszesz...) but the infinitive keeps s (pisać). Worth surfacing since the app\'s alternation annotations so far are all nominal; this is the verbal analog.',
+  },
+  {
+    id: 'v-isc',
+    infinitive: 'iść',
+    translation: 'to go (on foot)',
+    partOfSpeech: 'verb',
+    aspect: 'imperfective',
+    conjugationPattern: '-ę/-esz',
+    principalParts: { infinitive: 'iść', firstSingular: 'idę', thirdSingular: 'idzie' },
+    governance: [
+      {
+        complement: 'oblique',
+        case: 'accusative',
+        preposition: 'na',
+        note: 'motion toward, "go to" — na + accusative here, contrasting with być\'s na + locative for static location at the same place',
+      },
+    ],
+    notes: 'The id- present stem (idę/idziesz/idzie) doesn\'t look transparently related to the infinitive iść at a glance, but unlike być/jestem this is NOT suppletion — iść and idę share the same historical root; the -ść infinitive ending is a regular (if synchronically opaque) reflex of a consonant-final stem, a pattern several other Polish verbs also show (wieźć/wiozę, biec/biegnę). Not flagged irregular for that reason. Flagging the etymology claim itself as one you may want to double-check rather than fully trusting.',
   },
   {
     id: 'v-napisac',

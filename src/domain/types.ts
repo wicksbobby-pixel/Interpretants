@@ -180,6 +180,34 @@ export interface AdjectiveEntry {
   notes?: string;
 }
 
+/**
+ * Demonstratives (ten/ta/to) share the pronominal-declension endings that
+ * adjectives also use in modern Polish, EXCEPT they have no vocative — you
+ * don't address someone as "this!" — so their case table omits it rather
+ * than storing a meaningless placeholder.
+ */
+export type NonVocativeCaseTable = Record<Exclude<Case, 'vocative'>, FormCell>;
+
+export interface DemonstrativeEntry {
+  id: string;
+  /** Masculine nominative singular citation form, e.g. "ten". */
+  lemma: string;
+  translation: string;
+  partOfSpeech: 'demonstrative';
+  paradigm: {
+    singular: {
+      masculine: NonVocativeCaseTable & { accusativeAnimate?: FormCell };
+      feminine: NonVocativeCaseTable;
+      neuter: NonVocativeCaseTable;
+    };
+    plural: {
+      virile: NonVocativeCaseTable;
+      nonvirile: NonVocativeCaseTable;
+    };
+  };
+  notes?: string;
+}
+
 export type GovernedComplement = 'direct-object' | 'indirect-object' | 'oblique' | 'predicate';
 
 /**
@@ -215,7 +243,7 @@ export interface VerbEntry {
   notes?: string;
 }
 
-export type VocabEntry = NounEntry | AdjectiveEntry | VerbEntry;
+export type VocabEntry = NounEntry | AdjectiveEntry | VerbEntry | DemonstrativeEntry;
 
 /** Convenience constructor to keep seed-data files from repeating boilerplate. */
 export function cell(form: string, extra?: Partial<Omit<FormCell, 'form'>>): FormCell {
