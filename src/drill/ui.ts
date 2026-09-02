@@ -1,13 +1,21 @@
-import { CASE_ABBREV } from '../domain/types';
+import { CASES, CASE_ABBREV } from '../domain/types';
+import { NOUNS } from '../domain/vocab';
+import { CASE_COLOR } from './colors';
 import { generateClause, pickTemplate, type GeneratedClause, type ResolvedSlot } from './engine';
 import { unlockedTierIndex, CASE_TIERS } from './gating';
-import { createSession, recordSlotAnswer, recordUnitResult, type SessionState } from './session';
+import {
+  createAppState,
+  createRoundState,
+  encounterKey,
+  markEncountered,
+  recordSlotAnswer,
+  recordUnitResult,
+  type AppState,
+  type RoundState,
+} from './session';
 import { capitalizeWord } from './text';
 
-/**
- * Round length is a placeholder like the gating/ratio constants elsewhere
- * in this module — not a value with pedagogical grounding yet.
- */
+/** Placeholder like the gating constants elsewhere — not pedagogically tuned. */
 const ROUND_LENGTH = 8;
 
 interface RevealedItem {
@@ -16,11 +24,11 @@ interface RevealedItem {
 }
 
 export function mountGame(root: HTMLElement) {
-  let session: SessionState = createSession();
+  let app: AppState = createAppState();
+  let round: RoundState = createRoundState();
   let clause: GeneratedClause | null = null;
   let segIndex = 0;
   let revealed: RevealedItem[] = [];
-  let pendingPairCorrect: boolean | null = null;
   let slotActive = false;
   let currentOptions: { form: string; isCorrect: boolean }[] = [];
   let timerHandle: ReturnType<typeof setTimeout> | null = null;
@@ -30,8 +38,8 @@ export function mountGame(root: HTMLElement) {
   }
 
   function renderShell(stageInner: string) {
-    const tierIdx = unlockedTierIndex(session.stats);
-    const doneUnits = Math.min(session.totalUnits, ROUND_LENGTH);
+    const tierIdx = unlockedTierIndex(app.stats);
+    const doneUnits = Math.min(round.totalUnits, ROUND_LENGTH);
     root.innerHTML = `
       <div class="pcr-dots">
         ${Array.from({ length: ROUND_LENGTH })
@@ -40,8 +48,8 @@ export function mountGame(root: HTMLElement) {
       </div>
       <div class="pcr-stage">${stageInner}</div>
       <div class="pcr-footer">
-        <span>score ${session.score}</span>
-        <span>streak ${session.streak}</span>
+        <span>score ${round.score}</span>
+        <span>streak ${round.streak}</span>
         <span>tier ${tierIdx + 1}/${CASE_TIERS.length}</span>
         <span>${doneUnits}/${ROUND_LENGTH}</span>
       </div>
@@ -49,29 +57,31 @@ export function mountGame(root: HTMLElement) {
   }
 
   function renderIntro() {
+    root.classList.remove('wide');
     root.innerHTML = `
       <div class="pcr-intro">
         <h1>Case Rush</h1>
-        <p>Clauses build word by word from the vocabulary bank. When a slot needs declining, three forms arrive — pick the right one before the bar runs out. Adjective/demonstrative pairs are drilled as two linked picks: both have to be right to count.</p>
+        <p>A sentence builds word by word. When it needs a noun declined, three case-forms of that same noun arrive — pick the right one before the bar runs out.</p>
         <div class="pcr-intro-center">
           <button class="pcr-btn pcr-mono" id="pcr-start">start · ${ROUND_LENGTH} items</button>
+          <button class="pcr-btn pcr-btn-secondary pcr-mono" id="pcr-scorecard">scorecard</button>
         </div>
       </div>
     `;
     document.getElementById('pcr-start')!.onclick = startRound;
+    document.getElementById('pcr-scorecard')!.onclick = () => renderScorecard(renderIntro);
   }
 
   function startRound() {
-    session = createSession();
+    round = createRoundState();
     loadClause();
   }
 
   function loadClause() {
-    const template = pickTemplate(session.stats);
+    const template = pickTemplate(app.stats);
     clause = generateClause(template);
     segIndex = 0;
     revealed = [];
-    pendingPairCorrect = null;
     renderShell(`<div class="pcr-sentence"></div><div class="pcr-explain"></div><div class="pcr-timerwrap"><div class="pcr-timerbar"></div></div><div class="pcr-options"></div>`);
     processSegment();
   }
@@ -106,7 +116,7 @@ export function mountGame(root: HTMLElement) {
   function setupSlot(slot: ResolvedSlot) {
     slotActive = true;
     currentOptions = slot.options;
-    const timerDuration = Math.max(3, 6 - Math.floor(session.totalUnits / 3));
+    const timerDuration = Math.max(3, 6 - Math.floor(round.totalUnits / 3));
 
     const displayForm = (form: string) => (segIndex === 0 ? capitalizeWord(form) : form);
     const optsHTML = slot.options
@@ -118,8 +128,7 @@ export function mountGame(root: HTMLElement) {
     if (bar) {
       bar.style.transition = 'none';
       bar.style.transform = 'scaleX(1)';
-      // force reflow so the transition below actually animates from scaleX(1)
-      void bar.offsetWidth;
+      void bar.offsetWidth; // force reflow so the transition below animates from scaleX(1)
       bar.style.transition = `transform ${timerDuration}s linear`;
       requestAnimationFrame(() => {
         bar.style.transform = 'scaleX(0)';
@@ -143,19 +152,9 @@ export function mountGame(root: HTMLElement) {
     const chosen = chosenIdx === null ? null : currentOptions[chosenIdx];
     const correct = chosen?.isCorrect ?? false;
 
-    session = recordSlotAnswer(session, slot.caseName, correct);
-
-    if (slot.pairId) {
-      if (slot.pairRole === 'modifier') {
-        pendingPairCorrect = correct;
-      } else {
-        const pairCorrect = correct && (pendingPairCorrect ?? false);
-        session = recordUnitResult(session, pairCorrect);
-        pendingPairCorrect = null;
-      }
-    } else {
-      session = recordUnitResult(session, correct);
-    }
+    app = recordSlotAnswer(app, slot.caseName, correct);
+    app = markEncountered(app, slot.nounId, slot.number, slot.caseName);
+    round = recordUnitResult(round, correct);
 
     document.querySelectorAll<HTMLButtonElement>('.pcr-opt').forEach((btn, i) => {
       btn.disabled = true;
@@ -170,12 +169,13 @@ export function mountGame(root: HTMLElement) {
     if (!correct) fillHtml += ` <span class="pcr-fill-correction">(${displayForm(slot.correctForm)})</span>`;
 
     const sentenceEl = document.querySelector('.pcr-sentence');
-    if (sentenceEl) sentenceEl.innerHTML = joinRevealed() + (segIndex === 0 || revealed.length === 0 ? '' : ' ') + fillHtml;
+    if (sentenceEl) sentenceEl.innerHTML = joinRevealed() + (revealed.length === 0 ? '' : ' ') + fillHtml;
 
-    const caseLabel = `${CASE_ABBREV[slot.caseName]} · ${slot.explanation}`;
+    const color = CASE_COLOR[slot.caseName];
+    const badge = `<span class="pcr-case-badge" style="color:${color};border-color:${color}">${CASE_ABBREV[slot.caseName]}</span>`;
     const explainEl = document.querySelector('.pcr-explain');
     if (explainEl) {
-      explainEl.innerHTML = slot.alternationNote ? `${caseLabel}; ${slot.alternationNote}` : caseLabel;
+      explainEl.innerHTML = `${badge} ${slot.explanation}${slot.alternationNote ? '; ' + slot.alternationNote : ''}`;
     }
 
     revealed.push({ html: displayForm(slot.correctForm), attach: false });
@@ -191,30 +191,86 @@ export function mountGame(root: HTMLElement) {
       <div class="pcr-translation pcr-mono">"${clause.translation}"</div>
     `);
     setTimeout(() => {
-      if (session.totalUnits >= ROUND_LENGTH) finishRound();
+      if (round.totalUnits >= ROUND_LENGTH) finishRound();
       else loadClause();
     }, 1600);
   }
 
   function finishRound() {
-    const accuracy = session.totalUnits ? Math.round((session.correctUnits / session.totalUnits) * 100) : 0;
-    const tierIdx = unlockedTierIndex(session.stats);
+    const accuracy = round.totalUnits ? Math.round((round.correctUnits / round.totalUnits) * 100) : 0;
+    const tierIdx = unlockedTierIndex(app.stats);
     root.innerHTML = `
       <div class="pcr-intro">
         <h1>Round complete</h1>
-        <div class="pcr-final-score pcr-mono">${session.score}</div>
+        <div class="pcr-final-score pcr-mono">${round.score}</div>
         <div class="pcr-final-stats">
-          <span>${session.correctUnits}/${session.totalUnits} correct</span>
+          <span>${round.correctUnits}/${round.totalUnits} correct</span>
           <span>${accuracy}% accuracy</span>
           <span>tier ${tierIdx + 1}/${CASE_TIERS.length} unlocked</span>
         </div>
-        <p class="pcr-note">Mistake-by-mistake review, spaced resurfacing, and persistence across rounds land in stage 3 — this summary is the stage-2 placeholder.</p>
         <div class="pcr-intro-center">
           <button class="pcr-btn pcr-mono" id="pcr-again">play again</button>
+          <button class="pcr-btn pcr-btn-secondary pcr-mono" id="pcr-scorecard">scorecard</button>
         </div>
       </div>
     `;
     document.getElementById('pcr-again')!.onclick = startRound;
+    document.getElementById('pcr-scorecard')!.onclick = () => renderScorecard(finishRound);
+  }
+
+  function renderNounCard(nounId: string): string {
+    const noun = NOUNS.find((n) => n.id === nounId)!;
+    const rows: [string, 'singular' | 'plural'][] = [
+      ['SG', 'singular'],
+      ['PL', 'plural'],
+    ];
+    let seenCount = 0;
+    const rowsHtml = rows
+      .map(([rowLabel, num]) => {
+        const cellsHtml = CASES.map((c) => {
+          const seen = app.encountered.has(encounterKey(noun.id, num, c));
+          if (seen) seenCount++;
+          const color = CASE_COLOR[c];
+          return seen
+            ? `<td class="sc-cell sc-seen" style="color:${color}"><span class="sc-abbr" style="border-color:${color}">${CASE_ABBREV[c]}</span>${noun.paradigm[num][c].form}</td>`
+            : `<td class="sc-cell sc-unseen"><span class="sc-abbr">${CASE_ABBREV[c]}</span>···</td>`;
+        }).join('');
+        return `<tr><th class="sc-row-label">${rowLabel}</th>${cellsHtml}</tr>`;
+      })
+      .join('');
+    return `
+      <div class="sc-card">
+        <div class="sc-card-head">
+          <span class="sc-lemma">${noun.lemma}</span>
+          <span class="sc-gloss">"${noun.translation}"</span>
+          <span class="sc-progress pcr-mono">${seenCount}/14</span>
+        </div>
+        <div class="sc-table-wrap"><table class="sc-table">${rowsHtml}</table></div>
+      </div>
+    `;
+  }
+
+  function renderScorecard(onBack: () => void) {
+    root.classList.add('wide');
+    const totalCells = NOUNS.length * 14;
+    const totalSeen = app.encountered.size;
+    root.innerHTML = `
+      <div class="sc-root">
+        <div class="sc-head">
+          <h1>Scorecard</h1>
+          <span class="pcr-mono sc-total">${totalSeen}/${totalCells} forms encountered</span>
+        </div>
+        <p class="sc-hint">Case-forms reveal here the first time you meet them in a drill, right or wrong.</p>
+        <div class="sc-grid">${NOUNS.map((n) => renderNounCard(n.id)).join('')}</div>
+        <div class="pcr-intro-center">
+          <button class="pcr-btn pcr-mono" id="pcr-sc-back">back</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('pcr-sc-back')!.onclick = () => {
+      root.classList.remove('wide');
+      onBack();
+    };
   }
 
   document.addEventListener('keydown', (e) => {

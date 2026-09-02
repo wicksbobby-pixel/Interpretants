@@ -1,31 +1,24 @@
 import type { Case, GrammaticalNumber } from '../domain/types';
 
 /**
- * Hand-authored clause skeletons, in the same spirit as the vocabulary bank:
- * which verb, which person, which nouns are plausible fillers for each
- * slot — curated for semantic sanity, not randomly cross-joined from the
- * whole vocabulary (nothing here stops "myślę o oknie" from being
- * generated grammatically, but nobody hand-picked "pisać oknem" as a
- * pairing, so it won't come up). The actual inflected FORMS are still
- * resolved from the vocabulary bank at generation time, never hardcoded
- * here — only the noun/modifier CHOICES are curated.
+ * Hand-authored clause skeletons. Each verb-clause template drills exactly
+ * ONE case slot — a single cloze blank — chosen from a curated pool of
+ * plausible nouns; any other complement the verb governs is shown as
+ * fixed, already-correct text (flavor, not a drill target), which is how
+ * a two-object verb like "dawać" still gets sentence variety without a
+ * second blank. Actual inflected forms are resolved from the vocabulary
+ * bank at generation time — only the noun choices and sentence shapes are
+ * curated here.
  */
 
-export interface ModifierSpec {
-  kind: 'adjective' | 'demonstrative';
-  ids: string[];
-}
-
-export interface NpSlotSpec {
-  nounIds: string[];
-  number?: GrammaticalNumber;
-  modifier?: ModifierSpec;
-}
-
-export interface ComplementSpec extends NpSlotSpec {
+export interface ComplementSpec {
   /** Index into the verb's governance[] array — determines the case and preposition. */
   governanceIndex: number;
-  /** Overrides governance[].case, for phenomena governance doesn't capture (genitive of negation). */
+  nounIds: string[];
+  number?: GrammaticalNumber;
+  /** Exactly one complement per template must be drilled: true — that's the cloze blank. */
+  drilled: boolean;
+  /** Overrides governance[].case for this complement (genitive of negation). Only meaningful when drilled. */
   caseOverride?: Case;
   explanationOverride?: string;
 }
@@ -35,20 +28,20 @@ export interface VerbClauseTemplate {
   id: string;
   verbId: string;
   person: 'first' | 'third';
-  /** e.g. "Nie " for negated clauses. Only "mieć" is negated in the seed set. */
+  /** e.g. "Nie " for negated clauses. */
   negatedPrefix?: string;
-  /** Present only when person is 'third' — first-person clauses are pro-drop, no overt subject. */
-  subject?: NpSlotSpec;
+  /** Rendered as fixed, correct nominative text — never a blank. First-person clauses are pro-drop and omit this. */
+  subjectNounIds?: string[];
   complements: ComplementSpec[];
-  /** English gloss skeleton; {subj}, {obj0}, {obj1}... are filled from the resolved NPs. */
+  /** English gloss skeleton; {subj}, {c0}, {c1}... map to complements[] by index. */
   translationTemplate: string;
 }
 
 export interface VocativeAddressTemplate {
   kind: 'vocative-address';
   id: string;
-  addressee: NpSlotSpec;
-  /** Fixed trailing text, e.g. ", chodź tu!" — imperatives aren't modeled (see verbs.ts note on iść), so direct-address clauses don't drill a verb form at all, only the vocative noun (+ optional adjective). */
+  addresseeNounIds: string[];
+  /** Fixed trailing text, e.g. ", chodź tu!" — imperatives aren't modeled, so this doesn't drill a verb form, only the vocative noun. */
   interjection: string;
   translationTemplate: string;
 }
@@ -62,28 +55,17 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-object',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student'] }],
-    translationTemplate: 'I see {obj0}.',
+    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student'], drilled: true }],
+    translationTemplate: 'I see {c0}.',
   },
   {
     kind: 'verb-clause',
-    id: 'see-object-demonstrative',
+    id: 'see-object-third',
     verbId: 'v-widziec',
-    person: 'first',
-    complements: [
-      { governanceIndex: 0, nounIds: ['n-kot', 'n-student', 'n-dlugopis', 'n-stol'], modifier: { kind: 'demonstrative', ids: ['d-ten'] } },
-    ],
-    translationTemplate: 'I see {obj0}.',
-  },
-  {
-    kind: 'verb-clause',
-    id: 'see-object-adjective',
-    verbId: 'v-widziec',
-    person: 'first',
-    complements: [
-      { governanceIndex: 0, nounIds: ['n-student', 'n-stol', 'n-kot'], modifier: { kind: 'adjective', ids: ['a-dobry', 'a-wysoki'] } },
-    ],
-    translationTemplate: 'I see {obj0}.',
+    person: 'third',
+    subjectNounIds: ['n-kot', 'n-student', 'n-nauczyciel', 'n-kobieta'],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis'], drilled: true }],
+    translationTemplate: '{subj} sees {c0}.',
   },
   {
     kind: 'verb-clause',
@@ -95,45 +77,39 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
       {
         governanceIndex: 0,
         nounIds: ['n-kot', 'n-student', 'n-dlugopis'],
+        drilled: true,
         caseOverride: 'genitive',
         explanationOverride: 'negated verb → genitive of negation (a general syntactic rule, not specific to mieć)',
       },
     ],
-    translationTemplate: "I don't have {obj0}.",
-  },
-  {
-    kind: 'verb-clause',
-    id: 'subject-verb-object',
-    verbId: 'v-widziec',
-    person: 'third',
-    subject: { nounIds: ['n-kot', 'n-student', 'n-nauczyciel', 'n-kobieta'] },
-    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis'] }],
-    translationTemplate: '{subj} sees {obj0}.',
-  },
-  {
-    kind: 'verb-clause',
-    id: 'subject-demonstrative-verb-object',
-    verbId: 'v-widziec',
-    person: 'third',
-    subject: { nounIds: ['n-kot', 'n-student'], modifier: { kind: 'demonstrative', ids: ['d-ten'] } },
-    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-stol', 'n-dlugopis'] }],
-    translationTemplate: '{subj} sees {obj0}.',
+    translationTemplate: "I don't have {c0}.",
   },
   {
     kind: 'verb-clause',
     id: 'see-virile-plural',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-student'], number: 'plural' }],
-    translationTemplate: 'I see {obj0}.',
+    complements: [{ governanceIndex: 0, nounIds: ['n-student'], number: 'plural', drilled: true }],
+    translationTemplate: 'I see {c0}.',
   },
   {
     kind: 'verb-clause',
     id: 'go-to-university',
     verbId: 'v-isc',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-uniwersytet'] }],
-    translationTemplate: "I'm going to {obj0}.",
+    complements: [{ governanceIndex: 0, nounIds: ['n-uniwersytet'], drilled: true }],
+    translationTemplate: "I'm going to {c0}.",
+  },
+  {
+    kind: 'verb-clause',
+    id: 'give-what',
+    verbId: 'v-dawac',
+    person: 'first',
+    complements: [
+      { governanceIndex: 1, nounIds: ['n-kot', 'n-nauczyciel', 'n-dziecko'], drilled: false },
+      { governanceIndex: 0, nounIds: ['n-dlugopis'], drilled: true },
+    ],
+    translationTemplate: 'I give {c0} {c1}.',
   },
 
   // ---- tier 2 (instrumental / locative) ----
@@ -142,87 +118,67 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'think-about',
     verbId: 'v-myslec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-dziecko'] }],
-    translationTemplate: "I'm thinking about {obj0}.",
-  },
-  {
-    kind: 'verb-clause',
-    id: 'think-about-demonstrative',
-    verbId: 'v-myslec',
-    person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-kot'], modifier: { kind: 'demonstrative', ids: ['d-ten'] } }],
-    translationTemplate: "I'm thinking about {obj0}.",
+    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-dziecko'], drilled: true }],
+    translationTemplate: "I'm thinking about {c0}.",
   },
   {
     kind: 'verb-clause',
     id: 'be-predicate',
     verbId: 'v-byc',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-nauczyciel', 'n-student'] }],
-    translationTemplate: 'I am {obj0}.',
+    complements: [{ governanceIndex: 0, nounIds: ['n-nauczyciel', 'n-student'], drilled: true }],
+    translationTemplate: 'I am {c0}.',
   },
   {
     kind: 'verb-clause',
     id: 'write-instrumental',
     verbId: 'v-pisac',
     person: 'first',
-    complements: [{ governanceIndex: 1, nounIds: ['n-dlugopis'] }],
-    translationTemplate: "I'm writing with {obj0}.",
-  },
-  {
-    kind: 'verb-clause',
-    id: 'write-instrumental-adjective',
-    verbId: 'v-pisac',
-    person: 'first',
-    complements: [{ governanceIndex: 1, nounIds: ['n-dlugopis'], modifier: { kind: 'adjective', ids: ['a-dobry'] } }],
-    translationTemplate: "I'm writing with {obj0}.",
+    complements: [{ governanceIndex: 1, nounIds: ['n-dlugopis'], drilled: true }],
+    translationTemplate: "I'm writing with {c0}.",
   },
   {
     kind: 'verb-clause',
     id: 'be-at-university',
     verbId: 'v-byc',
     person: 'first',
-    complements: [{ governanceIndex: 1, nounIds: ['n-uniwersytet'] }],
-    translationTemplate: 'I am at {obj0}.',
+    complements: [{ governanceIndex: 1, nounIds: ['n-uniwersytet'], drilled: true }],
+    translationTemplate: 'I am at {c0}.',
   },
 
   // ---- tier 3 (dative) ----
   {
     kind: 'verb-clause',
-    id: 'give-dative-demonstrative-accusative',
+    id: 'give-to-recipient',
     verbId: 'v-dawac',
     person: 'first',
     complements: [
-      { governanceIndex: 1, nounIds: ['n-dziecko', 'n-kot'], modifier: { kind: 'demonstrative', ids: ['d-ten'] } },
-      { governanceIndex: 0, nounIds: ['n-dlugopis'] },
+      { governanceIndex: 1, nounIds: ['n-kot', 'n-nauczyciel', 'n-dziecko'], drilled: true },
+      { governanceIndex: 0, nounIds: ['n-dlugopis'], drilled: false },
     ],
-    translationTemplate: 'I give {obj0} {obj1}.',
-  },
-  {
-    kind: 'verb-clause',
-    id: 'give-dative-simple',
-    verbId: 'v-dawac',
-    person: 'first',
-    complements: [
-      { governanceIndex: 1, nounIds: ['n-kot', 'n-nauczyciel'] },
-      { governanceIndex: 0, nounIds: ['n-dlugopis'] },
-    ],
-    translationTemplate: 'I give {obj0} {obj1}.',
+    translationTemplate: 'I give {c0} {c1}.',
   },
 
   // ---- tier 4 (vocative) ----
   {
     kind: 'vocative-address',
     id: 'vocative-kot',
-    addressee: { nounIds: ['n-kot'] },
+    addresseeNounIds: ['n-kot'],
     interjection: ', chodź tu!',
     translationTemplate: '{addr}, come here!',
   },
   {
     kind: 'vocative-address',
-    id: 'vocative-student-adjective',
-    addressee: { nounIds: ['n-student'], modifier: { kind: 'adjective', ids: ['a-dobry'] } },
+    id: 'vocative-student',
+    addresseeNounIds: ['n-student'],
     interjection: ', dziękuję!',
     translationTemplate: '{addr}, thank you!',
+  },
+  {
+    kind: 'vocative-address',
+    id: 'vocative-nauczyciel',
+    addresseeNounIds: ['n-nauczyciel'],
+    interjection: ', dzień dobry!',
+    translationTemplate: '{addr}, hello!',
   },
 ];

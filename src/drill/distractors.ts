@@ -41,18 +41,3 @@ export function pickNounDistractors(noun: NounEntry, num: GrammaticalNumber, cor
   }
   return result;
 }
-
-/** Distractors for a modifier (adjective/demonstrative) slot: other cells of the same gender/number agreement table, falling back to the modifier's full paradigm if that table alone is too syncretic (small closed-class paradigms like "ten" can be). */
-export function pickModifierDistractors(
-  agreementTable: Record<string, FormCell>,
-  fullParadigmCells: FormCell[],
-  correctForm: string,
-  count = 2
-): FormCell[] {
-  const excludeForms = new Set([correctForm]);
-  const result = collectDistinct(Object.values(agreementTable), excludeForms, count);
-  if (result.length < count) {
-    result.push(...collectDistinct(fullParadigmCells, excludeForms, count - result.length));
-  }
-  return result;
-}

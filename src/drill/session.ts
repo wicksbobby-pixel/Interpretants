@@ -1,42 +1,62 @@
-import type { Case } from '../domain/types';
+import type { Case, GrammaticalNumber } from '../domain/types';
 import { createInitialCaseStats, recordCaseAttempt, type CaseStats } from './gating';
 
 /**
- * Pure state + reducers, no DOM. "Unit" = one drilled item for
- * scoring/streak purposes — a single-slot answer OR a completed coupled
- * pair (both modifier and noun correct), counted once. Per-case gating
- * stats are recorded per SLOT though (recordSlotAnswer), since a coupled
- * pair is genuinely two separate case-recall attempts on the same case,
- * not one.
+ * Two layers of state, deliberately not one:
  *
- * No persistence, pause/resume, or mistake log here — those are stage 3.
- * This is intentionally the minimum needed to drive a playable round.
+ * AppState persists across "play again" within a browser session (reset
+ * only on page reload — no cross-session persistence yet, that's stage 3).
+ * It holds the case-gating stats (so tier unlocks accumulate across
+ * rounds, not just within one) and the scorecard's "encountered" set
+ * (so the collection genuinely builds up over a sitting rather than
+ * resetting every round, which would defeat the point of it).
+ *
+ * RoundState is the score/streak for the round in progress and resets
+ * every startRound().
  */
 
-export interface SessionState {
+export interface AppState {
   stats: CaseStats;
+  encountered: Set<string>;
+}
+
+export function createAppState(): AppState {
+  return { stats: createInitialCaseStats(), encountered: new Set() };
+}
+
+export function encounterKey(nounId: string, number: GrammaticalNumber, caseName: Case): string {
+  return `${nounId}|${number}|${caseName}`;
+}
+
+export function markEncountered(app: AppState, nounId: string, number: GrammaticalNumber, caseName: Case): AppState {
+  const encountered = new Set(app.encountered);
+  encountered.add(encounterKey(nounId, number, caseName));
+  return { ...app, encountered };
+}
+
+export function recordSlotAnswer(app: AppState, caseName: Case, correct: boolean): AppState {
+  return { ...app, stats: recordCaseAttempt(app.stats, caseName, correct) };
+}
+
+export interface RoundState {
   score: number;
   streak: number;
   correctUnits: number;
   totalUnits: number;
 }
 
-export function createSession(): SessionState {
-  return { stats: createInitialCaseStats(), score: 0, streak: 0, correctUnits: 0, totalUnits: 0 };
+export function createRoundState(): RoundState {
+  return { score: 0, streak: 0, correctUnits: 0, totalUnits: 0 };
 }
 
-export function recordSlotAnswer(state: SessionState, caseName: Case, correct: boolean): SessionState {
-  return { ...state, stats: recordCaseAttempt(state.stats, caseName, correct) };
-}
-
-export function recordUnitResult(state: SessionState, correct: boolean): SessionState {
-  const streak = correct ? state.streak + 1 : 0;
-  const score = correct ? state.score + 10 + state.streak : state.score;
+export function recordUnitResult(round: RoundState, correct: boolean): RoundState {
+  const streak = correct ? round.streak + 1 : 0;
+  const score = correct ? round.score + 10 + round.streak : round.score;
   return {
-    ...state,
+    ...round,
     streak,
     score,
-    correctUnits: state.correctUnits + (correct ? 1 : 0),
-    totalUnits: state.totalUnits + 1,
+    correctUnits: round.correctUnits + (correct ? 1 : 0),
+    totalUnits: round.totalUnits + 1,
   };
 }

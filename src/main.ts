@@ -30,7 +30,8 @@ const GAME_CSS = `
     justify-content: center;
     padding: 32px 16px;
   }
-  .pcr-card { width: 100%; max-width: 560px; }
+  .pcr-card { width: 100%; max-width: 560px; transition: max-width 0.2s; }
+  .pcr-card.wide { max-width: 920px; }
   .pcr-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   .pcr-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 28px; }
   .pcr-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background 0.3s; }
@@ -51,6 +52,10 @@ const GAME_CSS = `
   .pcr-explain {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12.5px; color: var(--muted); min-height: 18px; margin-top: 10px; letter-spacing: 0.01em;
+  }
+  .pcr-case-badge {
+    display: inline-block; border: 1px solid; border-radius: 3px; padding: 1px 6px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; margin-right: 2px;
   }
 
   .pcr-timerwrap { height: 3px; background: var(--line); border-radius: 2px; margin: 22px auto 26px; max-width: 340px; overflow: hidden; }
@@ -93,6 +98,8 @@ const GAME_CSS = `
     padding: 10px 22px; border-radius: 3px; cursor: pointer; margin-top: 22px;
   }
   .pcr-btn:hover { background: rgba(201,163,92,0.1); }
+  .pcr-btn-secondary { border-color: var(--line); color: var(--muted); margin-left: 10px; }
+  .pcr-btn-secondary:hover { background: rgba(255,255,255,0.04); border-color: var(--muted); }
 
   .pcr-intro h1 { font-size: 26px; font-weight: 500; margin: 0 0 10px; text-align: center; letter-spacing: 0.01em; }
   .pcr-intro p { color: var(--muted); font-size: 15px; line-height: 1.6; text-align: center; max-width: 420px; margin: 0 auto; }
@@ -103,7 +110,28 @@ const GAME_CSS = `
     display: flex; justify-content: center; gap: 22px; flex-wrap: wrap;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: var(--muted); margin-bottom: 6px;
   }
-  .pcr-note { color: var(--muted); font-size: 12.5px; text-align: center; max-width: 380px; margin: 14px auto 0; line-height: 1.5; }
+
+  .sc-root { padding: 4px 0 20px; }
+  .sc-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .sc-head h1 { font-size: 22px; font-weight: 500; margin: 0; letter-spacing: 0.01em; }
+  .sc-total { font-size: 12px; color: var(--gold); }
+  .sc-hint { color: var(--muted); font-size: 13px; margin: 4px 0 24px; line-height: 1.5; }
+  .sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .sc-card { border: 1px solid var(--line); background: var(--panel); border-radius: 4px; padding: 14px 16px; }
+  .sc-card-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .sc-lemma { font-size: 17px; }
+  .sc-gloss { color: var(--muted); font-size: 12.5px; }
+  .sc-progress { color: var(--gold); font-size: 11px; margin-left: auto; }
+  .sc-table-wrap { overflow-x: auto; }
+  .sc-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .sc-table th.sc-row-label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; color: var(--muted);
+    text-align: left; padding: 4px 6px 4px 0; font-weight: 400;
+  }
+  .sc-cell { padding: 4px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .sc-cell.sc-unseen { color: var(--line); }
+  .sc-abbr { display: block; font-size: 8.5px; letter-spacing: 0.03em; color: var(--muted); border-bottom: 1px solid transparent; margin-bottom: 1px; }
+  .sc-unseen .sc-abbr { color: var(--line); }
 `;
 
 function mount() {
