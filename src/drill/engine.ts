@@ -1,4 +1,4 @@
-import type { Case, GrammaticalNumber } from '../domain/types';
+import type { Case, GrammaticalNumber, NounEntry } from '../domain/types';
 import { getNoun, getVerb } from '../domain/vocab';
 import { pick, pickNounDistractors, shuffle } from './distractors';
 import { resolveNounForm } from './resolve';
@@ -60,11 +60,17 @@ function describeCase(caseName: Case, number: GrammaticalNumber): string {
   return `${caseName} ${number}`;
 }
 
+/** English gloss for a noun at a given number — "the cat" / "the cats", falling back to naive +s pluralization unless the noun overrides it (e.g. dziecko → "children", kobieta → "women"). */
+function nounGloss(noun: NounEntry, number: GrammaticalNumber): string {
+  const word = number === 'plural' ? (noun.translationPlural ?? `${noun.translation}s`) : noun.translation;
+  return `the ${word}`;
+}
+
 /** A complement shown as fixed, already-correct text — never a drill target. */
 function resolveFixedNp(nounIds: string[], caseName: Case, number: GrammaticalNumber): { text: string; gloss: string } {
   const noun = getNoun(pick(nounIds));
   const text = resolveNounForm(noun, number, caseName).form;
-  return { text, gloss: `the ${noun.translation}` };
+  return { text, gloss: nounGloss(noun, number) };
 }
 
 /** The one cloze blank in a clause: a noun-only slot with same-paradigm distractors. */
@@ -87,7 +93,7 @@ function resolveDrilledNp(
     : undefined;
   return {
     segment: { kind: 'slot', slot: { id, nounId: noun.id, caseName, number, options, correctForm: correctCell.form, explanation, alternationNote } },
-    gloss: `the ${noun.translation}`,
+    gloss: nounGloss(noun, number),
   };
 }
 

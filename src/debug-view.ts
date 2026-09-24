@@ -30,12 +30,27 @@ function collectUncertain(): { entryId: string; lemma: string; path: string; cel
   return flagged;
 }
 
+function countNounProvenance(): { confirmed: number; supplied: number; total: number } {
+  let confirmed = 0;
+  let total = 0;
+  for (const n of NOUNS) {
+    for (const num of ['singular', 'plural'] as const) {
+      for (const c of Object.values(n.paradigm[num])) {
+        total++;
+        if (c.provenance === 'confirmed') confirmed++;
+      }
+    }
+  }
+  return { confirmed, supplied: total - confirmed, total };
+}
+
 function renderCaseTable(title: string, table: Record<string, FormCell>): string {
   const rows = Object.entries(table)
     .map(([caseName, c]) => {
       const abbrev = CASE_ABBREV[caseName as keyof typeof CASE_ABBREV] ?? caseName.slice(0, 3).toUpperCase();
       const flags = [
         c.uncertain ? '<span class="flag uncertain">unconfirmed</span>' : '',
+        c.provenance === 'confirmed' ? '<span class="flag attested">Duolingo-attested</span>' : '',
         c.stemAlternation
           ? `<span class="flag alt">${c.stemAlternation.from}→${c.stemAlternation.to} (${c.stemAlternation.mechanism})</span>`
           : '',
@@ -48,6 +63,7 @@ function renderCaseTable(title: string, table: Record<string, FormCell>): string
 
 export function renderDebugView(app: HTMLElement) {
   const uncertain = collectUncertain();
+  const provenance = countNounProvenance();
 
   app.innerHTML = `
     <style>
@@ -84,6 +100,7 @@ export function renderDebugView(app: HTMLElement) {
       td.flags { font-size: 10px; }
       .flag { display: inline-block; padding: 1px 5px; border-radius: 2px; margin-left: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
       .flag.uncertain { background: rgba(200,30,58,0.25); color: #ff8a97; }
+      .flag.attested { background: rgba(63,166,110,0.2); color: var(--good); }
       .flag.alt { background: rgba(201,163,92,0.2); color: var(--gold); }
       section { margin-bottom: 40px; }
       section > h2 { font-size: 16px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; }
@@ -98,6 +115,7 @@ export function renderDebugView(app: HTMLElement) {
         <span>${VERBS.length} verbs</span>
         <span>${DEMONSTRATIVES.length} demonstratives</span>
         <span>${VOCABULARY.length} total entries</span>
+        <span style="color: var(--good)">${provenance.confirmed}/${provenance.total} noun cells Duolingo-attested</span>
       </div>
 
       ${

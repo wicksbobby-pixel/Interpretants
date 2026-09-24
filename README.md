@@ -35,12 +35,38 @@ with the accusative rule formalized as `accusativeSingularEqualsGenitive`/
 `accusativePluralEqualsGenitive`. `koń` (`n-kon`) was added as the
 addendum's explicit test case — męskozwierzęcy, so its plural accusative
 reverts to nominative (`konie`), not the virile-looking `koni` (which is
-actually its genitive plural) — and is now drilled in-game (`see-object`,
-`see-object-third`, `see-nonvirile-animate-plural`). Structure Mode, dual
-gating thresholds, and the Duolingo-export reseed from the same addendum
-are not yet built — the reseed specifically needs the actual export file
-to tag forms confirmed vs. supplied, and Structure Mode is a large enough
-second mode that it's worth confirming sequencing before building it.
+actually its genitive plural).
+
+The vocab bank has also been reseeded against Bobby's actual 625-word
+Duolingo export: every noun's paradigm cells are now tagged
+`provenance: 'confirmed'` (the exact surface string appears in the export)
+or `'supplied'` (it doesn't). The pattern is stark and held across all 18
+nouns: NOM/GEN/ACC/INS show up repeatedly, DAT/LOC/VOC never appear even
+once, matching Bobby's own summary of the export exactly. Five new nouns
+were added per the addendum's named examples — `pies` (dog), `dziewczynka`
+(girl), `jabłko` (apple), `mężczyzna` (man), `chłopiec` (boy) — rounding
+out to two nouns per noun class. `mężczyzna` and `chłopiec` are the
+addendum's real payoff: `mężczyzna` is grammatically męskoosobowy but
+takes feminine-pattern singular endings throughout (accusative `mężczyznę`,
+not a genitive-based masculine accusative) before snapping back to virile
+plural morphology (`mężczyźni`) — a class that's easy to get wrong and,
+happily, unusually well attested in the export. `chłopiec` has a genuine
+three-way dat/loc/voc split (`chłopcowi`/`chłopcu`/`chłopcze`) rather than
+the loc=voc syncretism seen elsewhere in this bank; the locative and
+vocative are flagged `uncertain` rather than asserted with false
+confidence. New nouns are wired into existing templates so they're
+actually drilled, not just sitting in data (see `src/drill/templates.ts`).
+
+Fixed in passing while reseeding: the English translation gloss didn't
+pluralize when the drilled noun was plural ("I see the boy." while
+drilling `chłopców`) — `NounEntry.translationPlural` now overrides the
+naive `+s` default for irregular English plurals (`dziecko` → "children",
+`kobieta` → "women", `mężczyzna` → "men", `uniwersytet` → "universities").
+
+Structure Mode and dual gating thresholds from the same addendum are
+deliberately not started — confirmed as a separate, dedicated pass rather
+than building a second full drilling mode right after the single-blank
+rescope.
 
 ## Scorecard
 
@@ -75,7 +101,7 @@ npm run verify-templates # generates every clause template several times, checks
 
 ```
 src/domain/types.ts             # Case, NounClass, paradigm/entry schemas
-src/domain/vocab/nouns.ts       # 13 seed nouns
+src/domain/vocab/nouns.ts       # 18 seed nouns, provenance-tagged against the Duolingo export
 src/domain/vocab/adjectives.ts  # 2 seed adjectives (not currently drilled — see scope note)
 src/domain/vocab/demonstratives.ts  # ten/ta/to (not currently drilled — see scope note)
 src/domain/vocab/verbs.ts       # 11 seed verbs

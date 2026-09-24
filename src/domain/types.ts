@@ -148,6 +148,22 @@ export interface FormCell {
    */
   uncertain?: boolean;
   uncertainNote?: string;
+  /**
+   * A different axis from `uncertain`: this is about attestation against a
+   * specific external source (Bobby's 625-word Duolingo export), not about
+   * grammatical confidence. 'confirmed' means the exact surface string
+   * appears somewhere in that export; 'supplied' means it doesn't and the
+   * cell was filled in by me. A cell can be 'supplied' and still be a form
+   * I'm fully confident is correct (most regular endings) — attestation
+   * and correctness confidence are independent. Only populated where the
+   * noun has actually been checked against that export; its absence means
+   * "not checked," not "supplied." A form marked confirmed for one case
+   * cell is marked confirmed for every other cell that happens to share
+   * the exact same surface string (syncretism), since attestation is about
+   * the string, not the grammatical role Duolingo originally used it for
+   * — a flat word-list export can't tell us that role anyway.
+   */
+  provenance?: 'confirmed' | 'supplied';
 }
 
 export type CaseTable = Record<Case, FormCell>;
@@ -156,6 +172,8 @@ export interface NounEntry {
   id: string;
   lemma: string;
   translation: string;
+  /** English gloss for plural-number clauses, e.g. "children" for dziecko. Defaults to `translation + 's'` when omitted — set this explicitly for any noun whose English plural isn't regular. */
+  translationPlural?: string;
   partOfSpeech: 'noun';
   nounClass: NounClass;
   /**

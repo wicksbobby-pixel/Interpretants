@@ -55,7 +55,13 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-object',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student', 'n-kon'], drilled: true }],
+    complements: [
+      {
+        governanceIndex: 0,
+        nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student', 'n-kon', 'n-pies', 'n-mezczyzna', 'n-chlopiec', 'n-dziewczynka', 'n-jablko'],
+        drilled: true,
+      },
+    ],
     translationTemplate: 'I see {c0}.',
   },
   {
@@ -63,8 +69,8 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-object-third',
     verbId: 'v-widziec',
     person: 'third',
-    subjectNounIds: ['n-kot', 'n-student', 'n-nauczyciel', 'n-kobieta'],
-    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis', 'n-kon'], drilled: true }],
+    subjectNounIds: ['n-kot', 'n-student', 'n-nauczyciel', 'n-kobieta', 'n-mezczyzna'],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis', 'n-kon', 'n-pies', 'n-dziewczynka'], drilled: true }],
     translationTemplate: '{subj} sees {c0}.',
   },
   {
@@ -76,7 +82,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     complements: [
       {
         governanceIndex: 0,
-        nounIds: ['n-kot', 'n-student', 'n-dlugopis'],
+        nounIds: ['n-kot', 'n-student', 'n-dlugopis', 'n-pies'],
         drilled: true,
         caseOverride: 'genitive',
         explanationOverride: 'negated verb → genitive of negation (a general syntactic rule, not specific to mieć)',
@@ -89,7 +95,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-virile-plural',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-student'], number: 'plural', drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-student', 'n-chlopiec'], number: 'plural', drilled: true }],
     translationTemplate: 'I see {c0}.',
   },
   {
@@ -97,7 +103,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-nonvirile-animate-plural',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kon'], number: 'plural', drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kon', 'n-pies'], number: 'plural', drilled: true }],
     translationTemplate: 'I see {c0}.',
   },
   {
@@ -126,7 +132,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'think-about',
     verbId: 'v-myslec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-dziecko'], drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-dziecko', 'n-dziewczynka'], drilled: true }],
     translationTemplate: "I'm thinking about {c0}.",
   },
   {
@@ -134,7 +140,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'be-predicate',
     verbId: 'v-byc',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-nauczyciel', 'n-student'], drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-nauczyciel', 'n-student', 'n-chlopiec'], drilled: true }],
     translationTemplate: 'I am {c0}.',
   },
   {
