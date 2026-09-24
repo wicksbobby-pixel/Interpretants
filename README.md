@@ -28,6 +28,20 @@ per-case color coding beyond the post-answer explanation badge (stage 4,
 though a first cut of it landed early — see below); accessibility pass and
 tier-unlock threshold tuning (stage 5).
 
+**Addendum, in progress:** noun class is now the real five-way Polish
+system (`NounClass` in `src/domain/types.ts`: męskoosobowy/męskozwierzęcy/
+męskorzeczowy/żeński/nijaki) rather than a collapsed gender+animacy pair,
+with the accusative rule formalized as `accusativeSingularEqualsGenitive`/
+`accusativePluralEqualsGenitive`. `koń` (`n-kon`) was added as the
+addendum's explicit test case — męskozwierzęcy, so its plural accusative
+reverts to nominative (`konie`), not the virile-looking `koni` (which is
+actually its genitive plural) — and is now drilled in-game (`see-object`,
+`see-object-third`, `see-nonvirile-animate-plural`). Structure Mode, dual
+gating thresholds, and the Duolingo-export reseed from the same addendum
+are not yet built — the reseed specifically needs the actual export file
+to tag forms confirmed vs. supplied, and Structure Mode is a large enough
+second mode that it's worth confirming sequencing before building it.
+
 ## Scorecard
 
 A menu screen (`scorecard` button on the intro and round-complete
@@ -60,8 +74,8 @@ npm run verify-templates # generates every clause template several times, checks
 ## Layout
 
 ```
-src/domain/types.ts             # Case, Gender, Animacy, paradigm/entry schemas
-src/domain/vocab/nouns.ts       # 12 seed nouns
+src/domain/types.ts             # Case, NounClass, paradigm/entry schemas
+src/domain/vocab/nouns.ts       # 13 seed nouns
 src/domain/vocab/adjectives.ts  # 2 seed adjectives (not currently drilled — see scope note)
 src/domain/vocab/demonstratives.ts  # ten/ta/to (not currently drilled — see scope note)
 src/domain/vocab/verbs.ts       # 11 seed verbs

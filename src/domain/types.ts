@@ -35,19 +35,57 @@ export const CASE_ABBREV: Record<Case, string> = {
 
 export type GrammaticalNumber = 'singular' | 'plural';
 
+/**
+ * Grammatical gender as adjectives/demonstratives see it: three buckets for
+ * agreement-table selection. This is coarser than NounClass on purpose —
+ * an adjective's masculine singular table doesn't itself split by animacy,
+ * only its ACCUSATIVE CELL does (accusativeAnimate vs. accusative), which
+ * is a lookup keyed off the noun's full NounClass, not off Gender alone.
+ */
 export type Gender = 'masculine' | 'feminine' | 'neuter';
 
 /**
- * Animacy subdivides the masculine gender in the singular (it governs the
- * accusative = genitive vs. accusative = nominative split). In the plural
- * it resurfaces as the virile/non-virile distinction: masculine PERSONAL
- * nouns get their own plural agreement pattern; masculine animate
- * (non-personal), masculine inanimate, feminine, and neuter all fall
- * together into "non-virile" plural morphology. That's why NounEntry and
- * AdjectiveEntry key their plural tables by virile/non-virile rather than
- * by gender.
+ * The traditional five-way Polish noun-class system, formalized as a
+ * single enum rather than a gender+animacy pair. This is the real
+ * classification (rodzaj męskoosobowy/męskozwierzęcy/męskorzeczowy/
+ * żeński/nijaki), not a simplification of it — collapsing "masculine" +
+ * an animacy flag loses the fact that all three masculine subclasses
+ * behave identically for adjective/demonstrative TABLE selection but
+ * differently for the accusative rule and for plural agreement.
  */
-export type Animacy = 'personal' | 'animate' | 'inanimate';
+export type NounClass = 'męskoosobowy' | 'męskozwierzęcy' | 'męskorzeczowy' | 'żeński' | 'nijaki';
+
+/** Which of the three agreement tables (adjective/demonstrative gender tables) a noun class selects. */
+export function nounClassGender(nc: NounClass): Gender {
+  switch (nc) {
+    case 'męskoosobowy':
+    case 'męskozwierzęcy':
+    case 'męskorzeczowy':
+      return 'masculine';
+    case 'żeński':
+      return 'feminine';
+    case 'nijaki':
+      return 'neuter';
+  }
+}
+
+/**
+ * The accusative rule, formalized once so it can be asserted against
+ * (validating hand-entered noun cells) or actually computed from (Structure
+ * Mode's rule-generated content, which has no lexical irregularity to get
+ * wrong). Two independent facts, not one — singular and plural genuinely
+ * diverge: męskozwierzęcy takes acc=gen in the SINGULAR only ("widzę
+ * konia") and reverts to acc=nom in the PLURAL ("widzę konie", not the
+ * virile "*konie" pattern "koni") — only męskoosobowy keeps acc=gen in
+ * the plural. Treating animacy as if it "just generalizes" from singular
+ * to plural is exactly the bug this split exists to prevent.
+ */
+export function accusativeSingularEqualsGenitive(nc: NounClass): boolean {
+  return nc === 'męskoosobowy' || nc === 'męskozwierzęcy';
+}
+export function accusativePluralEqualsGenitive(nc: NounClass): boolean {
+  return nc === 'męskoosobowy';
+}
 
 /**
  * Present-tense ending pattern, used descriptively rather than as a
@@ -119,24 +157,26 @@ export interface NounEntry {
   lemma: string;
   translation: string;
   partOfSpeech: 'noun';
-  gender: Gender;
-  /** Required in practice for masculine; not meaningful for fem/neut gender agreement, but still drives virile/non-virile plural when the noun is personal. */
-  animacy?: Animacy;
+  nounClass: NounClass;
   /**
    * Which plural agreement pattern predicates/adjectives modifying this
    * noun in the plural must use — 'virile' (e.g. past-tense -li, byli;
    * nominative-plural adjective -y/-i with the k→c/r→rz etc. alternations)
    * vs. 'nonvirile' (past-tense -ły, były; adjective -e, no alternation).
    *
-   * Stored explicitly rather than derived from gender+animacy because it is
-   * NOT a reliable function of those alone: dziecko ("child") denotes a
-   * human referent but its plural (dzieci) is a lexically fixed exception
-   * that takes non-virile agreement — "dzieci były grzeczne", not
-   * "*dzieci byli grzeczni". A derive-from-animacy rule would get this
-   * word wrong with full confidence, which is exactly the failure mode
-   * this field exists to prevent. As a rule of thumb when adding new
-   * nouns: personal animacy → virile, everything else → nonvirile, UNLESS
-   * you know of a lexical exception like this one.
+   * Under the NounClass system this rule has no known exception — virile
+   * agreement applies iff nounClass is 'męskoosobowy', full stop — so this
+   * COULD now be derived rather than stored. Kept explicit anyway,
+   * matching the project's general stance of storing grammatical facts
+   * rather than deriving them, and because it's cheap insurance against a
+   * genuine exception surfacing later. dziecko ("child") is worth noting
+   * here even though it's NOT actually a nounClass exception: it's
+   * grammatically nijaki (neuter), and nijaki is never virile — its
+   * nonvirile plural ("dzieci były grzeczne", not "*byli grzeczni") only
+   * looks surprising if you reason from "refers to a human" instead of
+   * from grammatical class. That semantic trap is exactly what nounClass,
+   * as a formal category rather than a semantic one, is supposed to
+   * prevent.
    */
   pluralAgreementClass: 'virile' | 'nonvirile';
   /** Free-text descriptive label, e.g. "masculine personal, hard stem". Not an enum — declension class taxonomies vary by source and I'd rather describe than misclassify. */

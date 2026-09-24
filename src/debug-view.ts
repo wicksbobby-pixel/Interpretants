@@ -119,7 +119,7 @@ export function renderDebugView(app: HTMLElement) {
           (n) => `
           <div class="entry">
             <div class="entry-head"><span class="lemma">${n.lemma}</span><span class="pos">${n.partOfSpeech}</span></div>
-            <div class="entry-meta">${n.gender}${n.animacy ? ` · ${n.animacy}` : ''} · plural agreement: ${n.pluralAgreementClass} · ${n.declensionClass} · "${n.translation}"${n.irregular ? ' · IRREGULAR' : ''}</div>
+            <div class="entry-meta">${n.nounClass} · plural agreement: ${n.pluralAgreementClass} · ${n.declensionClass} · "${n.translation}"${n.irregular ? ' · IRREGULAR' : ''}</div>
             ${n.irregularNote ? `<div class="entry-notes">⚑ ${n.irregularNote}</div>` : ''}
             ${n.notes ? `<div class="entry-notes">${n.notes}</div>` : ''}
             <div class="tables">

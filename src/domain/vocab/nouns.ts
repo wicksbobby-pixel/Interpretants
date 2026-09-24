@@ -1,13 +1,13 @@
 import { cell, type NounEntry } from '../types';
 
 /**
- * Seed noun bank. Chosen to cover: all three genders, the masc.
- * personal/animate/inanimate three-way split, hard vs. soft stems, the
+ * Seed noun bank. Chosen to cover: all five noun classes (męskoosobowy,
+ * męskozwierzęcy, męskorzeczowy, żeński, nijaki), hard vs. soft stems, the
  * dative=locative singular syncretism (fem. -a nouns), the
- * nominative=accusative (inanimate) vs. genitive=accusative
- * (personal/animate) syncretism, virile vs. non-virile plural, and one
- * suppletive/irregular paradigm (dziecko) to exercise the irregular-flag
- * path end to end.
+ * nominative=accusative (męskorzeczowy) vs. genitive=accusative
+ * (męskoosobowy/męskozwierzęcy) singular syncretism, virile vs. non-virile
+ * plural, and one suppletive/irregular paradigm (dziecko) to exercise the
+ * irregular-flag path end to end.
  *
  * Vocative note: vocative forms below follow the standard literary
  * paradigm. In casual speech the nominative frequently substitutes for the
@@ -20,8 +20,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'kot',
     translation: 'cat',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'animate',
+    nounClass: 'męskozwierzęcy',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine animate, hard stem',
     stemHardness: 'hard',
@@ -53,12 +52,43 @@ export const NOUNS: NounEntry[] = [
     notes: 'Non-virile plural throughout — animals pattern with non-virile agreement even though they are grammatically animate in the singular.',
   },
   {
+    id: 'n-kon',
+    lemma: 'koń',
+    translation: 'horse',
+    partOfSpeech: 'noun',
+    nounClass: 'męskozwierzęcy',
+    pluralAgreementClass: 'nonvirile',
+    declensionClass: 'masculine animate, soft stem',
+    stemHardness: 'soft',
+    paradigm: {
+      singular: {
+        nominative: cell('koń'),
+        genitive: cell('konia'),
+        dative: cell('koniowi'),
+        accusative: cell('konia', { syncreticWith: ['genitive'] }),
+        instrumental: cell('koniem'),
+        locative: cell('koniu'),
+        vocative: cell('koniu', { syncreticWith: ['locative'] }),
+      },
+      plural: {
+        nominative: cell('konie'),
+        genitive: cell('koni'),
+        dative: cell('koniom'),
+        accusative: cell('konie', { syncreticWith: ['nominative'] }),
+        instrumental: cell('końmi'),
+        locative: cell('koniach'),
+        vocative: cell('konie'),
+      },
+    },
+    notes:
+      'The deliberate test case for the accusativePluralEqualsGenitive rule: koń is animate (męskozwierzęcy) so its SINGULAR accusative = genitive ("widzę konia"), but its PLURAL accusative reverts to nominative ("widzę konie") — it does NOT take the virile-looking "koni" (which is actually the genitive plural, not an accusative form at all). A generator that "generalizes" animacy from singular to plural gets exactly this wrong.',
+  },
+  {
     id: 'n-stol',
     lemma: 'stół',
     translation: 'table',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'inanimate',
+    nounClass: 'męskorzeczowy',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
@@ -91,8 +121,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'student',
     translation: 'student',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'personal',
+    nounClass: 'męskoosobowy',
     pluralAgreementClass: 'virile',
     declensionClass: 'masculine personal, hard stem',
     stemHardness: 'hard',
@@ -127,8 +156,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'nauczyciel',
     translation: 'teacher',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'personal',
+    nounClass: 'męskoosobowy',
     pluralAgreementClass: 'virile',
     declensionClass: 'masculine personal, soft stem',
     stemHardness: 'soft',
@@ -159,7 +187,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'kobieta',
     translation: 'woman',
     partOfSpeech: 'noun',
-    gender: 'feminine',
+    nounClass: 'żeński',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, hard stem, -a',
     stemHardness: 'hard',
@@ -195,7 +223,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'ziemia',
     translation: 'earth / land',
     partOfSpeech: 'noun',
-    gender: 'feminine',
+    nounClass: 'żeński',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, soft stem, -a',
     stemHardness: 'soft',
@@ -229,7 +257,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'noc',
     translation: 'night',
     partOfSpeech: 'noun',
-    gender: 'feminine',
+    nounClass: 'żeński',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'feminine, consonant-stem (i-declension), soft/functionally-soft',
     stemHardness: 'soft',
@@ -260,7 +288,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'okno',
     translation: 'window',
     partOfSpeech: 'noun',
-    gender: 'neuter',
+    nounClass: 'nijaki',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, hard stem, -o',
     stemHardness: 'hard',
@@ -299,7 +327,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'mieszkanie',
     translation: 'apartment',
     partOfSpeech: 'noun',
-    gender: 'neuter',
+    nounClass: 'nijaki',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, soft stem, -e (deverbal -anie type)',
     stemHardness: 'soft',
@@ -330,8 +358,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'długopis',
     translation: 'pen',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'inanimate',
+    nounClass: 'męskorzeczowy',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
@@ -363,8 +390,7 @@ export const NOUNS: NounEntry[] = [
     lemma: 'uniwersytet',
     translation: 'university',
     partOfSpeech: 'noun',
-    gender: 'masculine',
-    animacy: 'inanimate',
+    nounClass: 'męskorzeczowy',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'masculine inanimate, hard stem',
     stemHardness: 'hard',
@@ -397,13 +423,13 @@ export const NOUNS: NounEntry[] = [
     lemma: 'dziecko',
     translation: 'child',
     partOfSpeech: 'noun',
-    gender: 'neuter',
+    nounClass: 'nijaki',
     pluralAgreementClass: 'nonvirile',
     declensionClass: 'neuter, velar stem, -o (irregular/suppletive plural)',
     stemHardness: 'hard',
     irregular: true,
     irregularNote:
-      'Plural is suppletive ("dzieci", not a regular reflex of the singular stem). Declension aside, dzieci is also a genuine, lexically fixed exception to the general "human referent → virile agreement" rule: despite denoting people, it takes NON-virile agreement throughout — "Dzieci były grzeczne" (były, not byli), "grzeczne dzieci" (grzeczne, not grzeczni). A clause generator that infers agreement class from animacy/personhood alone will get this word wrong with full confidence; pluralAgreementClass is set explicitly below for exactly that reason. Treat the whole entry as memorize-directly rather than pattern-generalizable.',
+      'Plural is suppletive ("dzieci", not a regular reflex of the singular stem). Worth noting for anyone reasoning by semantics rather than grammar: dzieci denotes people but is NOT a nounClass exception — dziecko is straightforwardly nijaki (neuter), and nijaki nouns are never virile, so "Dzieci były grzeczne" (były, not byli) is exactly what the grammatical class predicts. The trap is inferring virile agreement from "refers to humans" instead of from nounClass. Treat the whole entry as memorize-directly rather than pattern-generalizable regardless.',
     paradigm: {
       singular: {
         nominative: cell('dziecko'),

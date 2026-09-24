@@ -55,7 +55,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     id: 'see-object',
     verbId: 'v-widziec',
     person: 'first',
-    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student'], drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kot', 'n-kobieta', 'n-stol', 'n-dlugopis', 'n-student', 'n-kon'], drilled: true }],
     translationTemplate: 'I see {c0}.',
   },
   {
@@ -64,7 +64,7 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     verbId: 'v-widziec',
     person: 'third',
     subjectNounIds: ['n-kot', 'n-student', 'n-nauczyciel', 'n-kobieta'],
-    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis'], drilled: true }],
+    complements: [{ governanceIndex: 0, nounIds: ['n-kobieta', 'n-student', 'n-stol', 'n-dlugopis', 'n-kon'], drilled: true }],
     translationTemplate: '{subj} sees {c0}.',
   },
   {
@@ -90,6 +90,14 @@ export const CLAUSE_TEMPLATES: ClauseTemplate[] = [
     verbId: 'v-widziec',
     person: 'first',
     complements: [{ governanceIndex: 0, nounIds: ['n-student'], number: 'plural', drilled: true }],
+    translationTemplate: 'I see {c0}.',
+  },
+  {
+    kind: 'verb-clause',
+    id: 'see-nonvirile-animate-plural',
+    verbId: 'v-widziec',
+    person: 'first',
+    complements: [{ governanceIndex: 0, nounIds: ['n-kon'], number: 'plural', drilled: true }],
     translationTemplate: 'I see {c0}.',
   },
   {
